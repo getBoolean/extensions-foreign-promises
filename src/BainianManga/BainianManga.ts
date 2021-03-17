@@ -26,7 +26,7 @@ import {
     icon: 'favicon.ico',
     author: 'getBoolean',
     authorWebsite: 'https://github.com/getBoolean',
-    description: 'Extension that pulls manga from BainianManga',
+    description: 'Extension that pulls manga from BainianManga, includes Advanced Search',
     hentaiSource: false,
     websiteBaseURL: `${BM_DOMAIN}/comic.html`,
     sourceTags: [
