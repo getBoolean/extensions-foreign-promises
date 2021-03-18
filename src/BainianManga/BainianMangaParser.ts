@@ -78,7 +78,7 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
             id,
             mangaId,
             name,
-            langCode: LanguageCode.ENGLISH,
+            langCode: LanguageCode.CHINEESE,
             chapNum,
             time
         }))

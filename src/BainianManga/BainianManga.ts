@@ -21,7 +21,7 @@ import {
   };
   
   export const BainianMangaInfo: SourceInfo = {
-    version: '0.0.3',
+    version: '0.0.4',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
