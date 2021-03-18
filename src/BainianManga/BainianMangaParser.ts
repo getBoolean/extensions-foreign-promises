@@ -68,7 +68,7 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
             if (index < allChapters.length - 1)
             {
                 const nextName: string = $('a', allChapters[index+1]).text() ?? ''
-                tempChapNum = Number((nextName.match(/^第(\d+)/) ?? [0,0] )[1]) + 0.5
+                tempChapNum = Number(nextName.match(/\d+/) ?? 0 ) + 0.5
             }
         }
 
