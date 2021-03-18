@@ -345,7 +345,7 @@ const headers = {
     referer: BM_DOMAIN
 };
 exports.BainianMangaInfo = {
-    version: '0.0.17',
+    version: '0.0.18',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -381,11 +381,12 @@ class BainianManga extends paperback_extensions_common_1.Source {
             const response = yield this.requestManager.schedule(request, 1);
             const $ = this.cheerio.load(response.data);
             let result = BainianMangaParser_1.parseMangaDetails($, mangaId);
+            // Hacky solution to get the image domain
             // Get image domain from (ex:) https://img.lxhy88.com/zhang/26110/1602252/d41ae644ddcd2e1edb8141f0b5abf8c1.jpg
             const image = result[1].replace('https://', '').replace('http://', '');
             const tempImageDomain = image.substring(0, image.indexOf('/')); // Set new image domain
             this.imageDomain = `https://${tempImageDomain}`;
-            console.log(this.imageDomain);
+            // console.log(this.imageDomain)
             return result[0];
         });
     }
@@ -505,6 +506,7 @@ class BainianManga extends paperback_extensions_common_1.Source {
     getViewMoreItems(homepageSectionId, metadata) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            console.log('getViewMoreItems($)');
             let page = (_a = metadata === null || metadata === void 0 ? void 0 : metadata.page) !== null && _a !== void 0 ? _a : 1;
             let param = '';
             if (homepageSectionId === 'hot_comics')
@@ -570,7 +572,7 @@ exports.parseMangaDetails = ($, mangaId) => {
     const time = new Date(parsedJson.upDate);
     lastUpdate = time.toDateString();
     const summary = parsedJson.description;
-    console.log('image: ' + image);
+    // console.log('image: ' + image)
     // let tempImage = image.replace('https://', '').replace('http://', '')
     // let tempImageDomain = tempImage.substring(0, tempImage.indexOf('/')) // Set imageDomain if it is different
     // this.imageDomain = `https://${tempImageDomain}`
@@ -623,14 +625,14 @@ exports.parseChapterDetails = (imageDomain, mangaId, chapterId, data) => {
     var _a;
     const baseImageURL = imageDomain;
     const imageCode = (_a = data === null || data === void 0 ? void 0 : data.match(/var z_img='(.*?)';/)) === null || _a === void 0 ? void 0 : _a.pop();
-    console.log("data?.match(/var z_img='(.*?)';/): " + (data === null || data === void 0 ? void 0 : data.match(/var z_img='(.*?)';/)));
-    console.log('imageCode: ' + imageCode);
+    // console.log("data?.match(/var z_img='(.*?)';/): " + data?.match(/var z_img='(.*?)';/))
+    // console.log('imageCode: ' + imageCode)
     let pages = [];
     if (imageCode) {
         const imagePaths = JSON.parse(imageCode);
         pages = imagePaths.map(imagePath => `${baseImageURL}/${imagePath}`);
     }
-    console.log(pages);
+    // console.log(pages)
     return createChapterDetails({
         id: chapterId,
         mangaId: mangaId,
@@ -774,6 +776,7 @@ exports.parseTags = ($) => {
 };
 exports.parseViewMore = ($) => {
     var _a, _b, _c, _d;
+    console.log('parseViewMore($)');
     const panel = $('.tbox_m');
     const allItems = $('.vbox', panel).toArray();
     const manga = [];
