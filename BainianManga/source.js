@@ -606,14 +606,16 @@ exports.parseChapters = ($, mangaId) => {
     }
     return chapters;
 };
-exports.parseChapterDetails = ($, mangaId, chapterId, { data }) => {
+exports.parseChapterDetails = ($, mangaId, chapterId, data) => {
     var _a, _b;
     const baseImageURL = (_a = data === null || data === void 0 ? void 0 : data.match(/var z_img='(.*?)';/)) === null || _a === void 0 ? void 0 : _a.pop();
     const imageCode = (_b = data === null || data === void 0 ? void 0 : data.match(/var z_img='(.*?)';/)) === null || _b === void 0 ? void 0 : _b.pop();
+    console.log("data?.match(/var z_img='(.*?)';/): " + (data === null || data === void 0 ? void 0 : data.match(/var z_img='(.*?)';/)));
+    console.log('imageCode: ' + imageCode);
     let pages = [];
     if (imageCode) {
         const imagePaths = JSON.parse(imageCode);
-        pages = imagePaths.map(imagePath => `${BM_IMAGE_DOMAIN}${imagePath}`);
+        pages = imagePaths.map(imagePath => `${BM_IMAGE_DOMAIN}/${imagePath}`);
     }
     console.log(pages);
     return createChapterDetails({
