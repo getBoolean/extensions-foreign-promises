@@ -1,14 +1,12 @@
 import { Chapter, ChapterDetails, HomeSection, LanguageCode, Manga, MangaStatus, MangaTile, MangaUpdates, PagedResults, SearchRequest, TagSection } from "paperback-extensions-common";
 
-const BM_IMAGE_DOMAIN = 'https://img.lxhy88.com'
-
-export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
+export const parseMangaDetails = ($: CheerioStatic, mangaId: string): [Manga, string] => {
     const json = $('[type=application\\/ld\\+json]').html()?.replace(/\t*\n*/g, '') ?? ''
     const parsedJson = JSON.parse(json)
 
     const infoElement = $('div.data')
-    const title = parsedJson.title
-    const image = parsedJson.images[0]
+    const title : string = parsedJson.title
+    const image : string = parsedJson.images[0]
     let author = $('.dir', infoElement).text().trim().replace('作者：', '')
     let artist = ''
     let rating = 0
@@ -36,7 +34,12 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
 
     const summary = parsedJson.description
 
-    return createManga({
+    console.log('image: ' + image)
+    // let tempImage = image.replace('https://', '').replace('http://', '')
+    // let tempImageDomain = tempImage.substring(0, tempImage.indexOf('/')) // Set imageDomain if it is different
+    // this.imageDomain = `https://${tempImageDomain}`
+
+    return [createManga({
         id: mangaId,
         titles,
         image,
@@ -50,7 +53,7 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
         lastUpdate,
         desc: summary,
         hentai
-    })
+    }), image]
 }
 
 
@@ -88,8 +91,8 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
 }
 
 
-export const parseChapterDetails = ($: CheerioStatic, mangaId: string, chapterId: string, data: any): ChapterDetails => {
-    const baseImageURL = data?.match(/var z_img='(.*?)';/)?.pop()
+export const parseChapterDetails = (imageDomain: string, mangaId: string, chapterId: string, data: any): ChapterDetails => {
+    const baseImageURL = imageDomain
     const imageCode = data?.match(/var z_img='(.*?)';/)?.pop()
     console.log("data?.match(/var z_img='(.*?)';/): " + data?.match(/var z_img='(.*?)';/))
     console.log('imageCode: ' + imageCode)
@@ -97,7 +100,7 @@ export const parseChapterDetails = ($: CheerioStatic, mangaId: string, chapterId
     let pages : string[] = []
     if (imageCode) {
         const imagePaths = JSON.parse(imageCode) as string[]
-        pages = imagePaths.map(imagePath => `${BM_IMAGE_DOMAIN}/${imagePath}`)
+        pages = imagePaths.map(imagePath => `${baseImageURL}/${imagePath}`)
     }
     console.log(pages)
 

@@ -15,13 +15,14 @@ import {
   import { generateSearch, isLastPage, parseChapterDetails, parseChapters, parseHomeSections, parseHotManga, parseNewManga, parseMangaDetails, parseSearch, parseTags, parseUpdatedManga, parseViewMore, UpdatedManga } from "./BainianMangaParser"
   
   const BM_DOMAIN = 'https://m.bnmanhua.com';
+  const BM_IMAGE_DOMAIN = 'https://img.lxhy88.com'
   const method = 'GET';
   const headers = {
       referer: BM_DOMAIN
   };
   
   export const BainianMangaInfo: SourceInfo = {
-    version: '0.0.15',
+    version: '0.0.16',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -43,8 +44,10 @@ import {
   
   export class BainianManga extends Source {
     getMangaShareUrl(mangaId: string): string | null { return `${BM_DOMAIN}/comic/${mangaId}` }
+    private imageDomain = BM_IMAGE_DOMAIN
   
     async getMangaDetails(mangaId: string): Promise<Manga> {
+        this.imageDomain = BM_IMAGE_DOMAIN // Reset image domain back to this
         const request = createRequestObject({
             url: `${BM_DOMAIN}/comic/`,
             method,
@@ -53,7 +56,14 @@ import {
 
         const response = await this.requestManager.schedule(request, 1)
         const $ = this.cheerio.load(response.data)
-        return parseMangaDetails($, mangaId)
+        let result : [Manga, string] = parseMangaDetails($, mangaId)
+        // Get image domain from (ex:) https://img.lxhy88.com/zhang/26110/1602252/d41ae644ddcd2e1edb8141f0b5abf8c1.jpg
+        const image = result[1].replace('https://', '').replace('http://', '')
+        const tempImageDomain = image.substring(0, image.indexOf('/')) // Set imageDomain if it is different
+        this.imageDomain = `https://${tempImageDomain}`
+        console.log(this.imageDomain)
+
+        return result[0]
     }
   
 
@@ -80,10 +90,8 @@ import {
 
         const response = await this.requestManager.schedule(request, 1)
         const $ = this.cheerio.load(response.data)
-        // console.log(`${BM_DOMAIN}/comic/${mangaId}/${chapterId}.html`)
-        // console.log(response.data)
 
-        return parseChapterDetails($, mangaId, chapterId, response.data)
+        return parseChapterDetails(this.imageDomain, mangaId, chapterId, response.data)
     }
   
 
