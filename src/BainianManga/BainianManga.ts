@@ -12,7 +12,7 @@ import {
     RequestHeaders,
     TagType
   } from "paperback-extensions-common"
-  import { generateSearch, isLastPage, parseChapterPageDetails, parseChapters, parseHomeSections, parseMangaDetails, parseSearch, parseTags, parseUpdatedManga, parseViewMore, UpdatedManga } from "./BainianMangaParser"
+  import { generateSearch, isLastPage, parseChapterPageDetails, parseChapters, parseHomeSections, parseHotManga, parseNewManga, parseMangaDetails, parseSearch, parseTags, parseUpdatedManga, parseViewMore, UpdatedManga } from "./BainianMangaParser"
   
   const BM_DOMAIN = 'https://m.bnmanhua.com';
   const method = 'GET';
@@ -135,23 +135,41 @@ import {
       }
     }
   
-    // TODO
+ 
     async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
       // Give Paperback a skeleton of what these home sections should look like to pre-render them
       const section1 = createHomeSection({ id: 'a_recommended', title: '推荐漫画' })
       const section3 = createHomeSection({ id: 'hot_comics', title: '热门漫画', view_more: true })
       const section2 = createHomeSection({ id: 'z_new_updates', title: '最近更新', view_more: true })
-      const sections = [section1, section2, section3]
   
       // Fill the homsections with data
-      const request = createRequestObject({
+      const request1 = createRequestObject({
         url: `${BM_DOMAIN}/comic.html`,
         method,
       })
+
+      const request2 = createRequestObject({
+        url: `${BM_DOMAIN}/page/hot.html`,
+        method,
+      })
+
+      const request3 = createRequestObject({
+        url: `${BM_DOMAIN}/page/new.html`,
+        method,
+      })
   
-      const response = await this.requestManager.schedule(request, 1)
-      const $ = this.cheerio.load(response.data)
-      parseHomeSections($, sections, sectionCallback)
+      const response1 = await this.requestManager.schedule(request1, 1)
+      const $1 = this.cheerio.load(response1.data)
+
+      const response2 = await this.requestManager.schedule(request2, 1)
+      const $2 = this.cheerio.load(response2.data)
+
+      const response3 = await this.requestManager.schedule(request3, 1)
+      const $3 = this.cheerio.load(response3.data)
+
+      parseHomeSections($1, section1, sectionCallback)
+      parseHotManga($2, section2, sectionCallback)
+      parseNewManga($3, section3, sectionCallback)
     }
   
 

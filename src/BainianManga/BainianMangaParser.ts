@@ -34,19 +34,19 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
     const summary = $('div.tbox_js').text().trim()
 
     return createManga({
-      id: mangaId,
-      titles,
-      image,
-      rating: Number(rating),
-      status,
-      artist,
-      author,
-      tags: tagSections,
-      views,
-      follows,
-      lastUpdate,
-      desc: summary,
-      hentai
+        id: mangaId,
+        titles,
+        image,
+        rating: Number(rating),
+        status,
+        artist,
+        author,
+        tags: tagSections,
+        views,
+        follows,
+        lastUpdate,
+        desc: summary,
+        hentai
     })
 }
 
@@ -122,56 +122,88 @@ export const parseUpdatedManga = ($: CheerioStatic, time: Date, ids: string[]): 
     }
 }
 
-// TODO
-export const parseHomeSections = ($: CheerioStatic, sections: HomeSection[], sectionCallback: (section: HomeSection) => void): void => {
-    for (const section of sections) sectionCallback(section)
-    const topManga: MangaTile[] = []
-    const updateManga: MangaTile[] = []
-    const newManga: MangaTile[] = []
 
-    for (const item of $('.item', '.owl-carousel').toArray()) {
-      const id = $('a', item).first().attr('href')?.split('/').pop() ?? ''
-      const image = $('img', item).attr('src') ?? ''
-      topManga.push(createMangaTile({
-        id,
-        image,
-        title: createIconText({ text: $('a', item).first().text() }),
-        subtitleText: createIconText({ text: $('[rel=nofollow]', item).text() })
-      }))
+export const parseHomeSections = ($: CheerioStatic, section: HomeSection, sectionCallback: (section: HomeSection) => void): void => {
+    sectionCallback(section)
+    const recommendedManga: MangaTile[] = []
+
+    // Recommended
+    const grid = $('.tbox_m')[0]
+    const allItems = $('.vbox', grid).toArray()
+    for (const item of allItems) {
+        const id = (($('a', item).first().attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
+        const title = $('.vbox_t', item).attr('title') ?? 'No title'
+        const subtitle = $('.vbox_t span', item).text()
+        const image = $('.vbox_t mip-img', item).attr('src') ?? ''
+
+        recommendedManga.push(createMangaTile({
+            id,
+            image,
+            title: createIconText({ text: title }),
+            subtitleText: createIconText({ text: subtitle })
+        }))
     }
 
-    for (const item of $('.content-homepage-item', '.panel-content-homepage').toArray()) {
-      const id = $('a', item).first().attr('href')?.split('/').pop() ?? ''
-      const image = $('img', item).attr('src') ?? ''
-      const itemRight = $('.content-homepage-item-right', item)
-      const latestUpdate = $('.item-chapter', itemRight).first()
-      updateManga.push(createMangaTile({
-        id,
-        image,
-        title: createIconText({ text: $('a', itemRight).first().text() }),
-        subtitleText: createIconText({ text: $('.item-author', itemRight).text() }),
-        primaryText: createIconText({ text: $('.genres-item-rate', item).text(), icon: 'star.fill' }),
-        secondaryText: createIconText({ text: $('i', latestUpdate).text(), icon: 'clock.fill' })
-      }))
-    }
-
-    for (const item of $('a', '.panel-newest-content').toArray()) {
-      const id = $(item).attr('href')?.split('/').pop() ?? ''
-      const image = $('img', item).attr('src') ?? ''
-      const title = $('img', item).attr('alt') ?? ''
-      newManga.push(createMangaTile({
-        id,
-        image,
-        title: createIconText({ text: title })
-      }))
-    }
-
-    sections[0].items = topManga
-    sections[1].items = updateManga
-    sections[2].items = newManga
+    section.items = recommendedManga
 
     // Perform the callbacks again now that the home page sections are filled with data
-    for (const section of sections) sectionCallback(section)
+    sectionCallback(section)
+}
+
+
+export const parseHotManga = ($: CheerioStatic, section: HomeSection, sectionCallback: (section: HomeSection) => void): void => {
+    sectionCallback(section)
+    const hotManga: MangaTile[] = []
+
+    // New
+    const grid = $('.tbox_m')[0]
+    const allItems = $('.vbox', grid).toArray()
+    for (const item of allItems) {
+        const id = (($('a', item).first().attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
+        const title = $('.vbox_t', item).attr('title') ?? 'No title'
+        const subtitle = $('.vbox_t span', item).text()
+        const image = $('.vbox_t mip-img', item).attr('src') ?? ''
+
+        hotManga.push(createMangaTile({
+            id,
+            image,
+            title: createIconText({ text: title }),
+            subtitleText: createIconText({ text: subtitle })
+        }))
+    }
+
+    section.items = hotManga
+
+    // Perform the callbacks again now that the home page sections are filled with data
+    sectionCallback(section)
+}
+
+
+export const parseNewManga = ($: CheerioStatic, section: HomeSection, sectionCallback: (section: HomeSection) => void): void => {
+    sectionCallback(section)
+    const newManga: MangaTile[] = []
+
+    // New
+    const grid = $('.tbox_m')[0]
+    const allItems = $('.vbox', grid).toArray()
+    for (const item of allItems) {
+        const id = (($('a', item).first().attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
+        const title = $('.vbox_t', item).attr('title') ?? 'No title'
+        const subtitle = $('.vbox_t span', item).text()
+        const image = $('.vbox_t mip-img', item).attr('src') ?? ''
+
+        newManga.push(createMangaTile({
+            id,
+            image,
+            title: createIconText({ text: title }),
+            subtitleText: createIconText({ text: subtitle })
+        }))
+    }
+
+    section.items = newManga
+
+    // Perform the callbacks again now that the home page sections are filled with data
+    sectionCallback(section)
 }
 
 
@@ -179,7 +211,7 @@ export const generateSearch = (query: SearchRequest): string => {
 
     let keyword = (query.title ?? '').replace(/ /g, '+')
     if (query.author)
-      keyword += (query.author ?? '').replace(/ /g, '+')
+        keyword += (query.author ?? '').replace(/ /g, '+')
     let search: string = `${keyword}`
 
     return search
@@ -191,17 +223,17 @@ export const parseSearch = ($: CheerioStatic): MangaTile[] => {
     const allItems = $('.vbox', panel).toArray()
     const manga: MangaTile[] = []
     for (const item of allItems) {
-      const id = (($('a', item).first().attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
-      const title = $('.vbox_t', item).attr('title') ?? 'No title'
-      const subTitle = $('.vbox_t span', item).attr('src') ?? ''
-      const image = $('.vbox_t mip-img', item).attr('src') ?? ''
+        const id = (($('a', item).first().attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
+        const title = $('.vbox_t', item).attr('title') ?? 'No title'
+        const subtitle = $('.vbox_t span', item).text()
+        const image = $('.vbox_t mip-img', item).attr('src') ?? ''
 
-      manga.push(createMangaTile({
-        id,
-        image,
-        title: createIconText({ text: title }),
-        subtitleText: createIconText({ text: subTitle }),
-      }))
+        manga.push(createMangaTile({
+            id,
+            image,
+            title: createIconText({ text: title }),
+            subtitleText: createIconText({ text: subtitle }),
+        }))
     }
     return manga
 }
@@ -210,39 +242,34 @@ export const parseSearch = ($: CheerioStatic): MangaTile[] => {
 export const parseTags = ($: CheerioStatic): TagSection[] | null => {
     const allItems = $('.tbox a').toArray()
     const genres = createTagSection({
-      id: 'genre',
-      label: 'Genre',
-      tags: []
+        id: 'genre',
+        label: 'Genre',
+        tags: []
     })
     for (let item of allItems) {
-      let id = ($(item).attr('href')?.split('/').pop() ?? '').replace('.html', '')
-      let label = $(item).text()
-      genres.tags.push(createTag({ id: id, label: label }))
+        let id = ($(item).attr('href')?.split('/').pop() ?? '').replace('.html', '')
+        let label = $(item).text()
+        genres.tags.push(createTag({ id: id, label: label }))
     }
     return [genres]
 }
 
-// TODO
+
 export const parseViewMore = ($: CheerioStatic): MangaTile[] => {
+    const panel = $('.tbox_m')
+    const allItems = $('.vbox', panel).toArray()
     const manga: MangaTile[] = []
-    const panel = $('.panel-content-genres')
-    for (const item of $('.content-genres-item', panel).toArray()) {
-        const id = ($('a', item).first().attr('href') ?? '').split('/').pop() ?? ''
-        const image = $('img', item).attr('src') ?? ''
-        const title = $('.genres-item-name', item).text()
-        const subtitle = $('.genres-item-chap', item).text()
-        let time = new Date($('.genres-item-time').first().text())
-        if (time > new Date(Date.now())) {
-            time = new Date(Date.now() - 60000)
-        }
-        const rating = $('.genres-item-rate', item).text()
+    for (const item of allItems) {
+        const id = (($('a', item).first().attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
+        const title = $('.vbox_t', item).attr('title') ?? 'No title'
+        const subtitle = $('.vbox_t span', item).text()
+        const image = $('.vbox_t mip-img', item).attr('src') ?? ''
+
         manga.push(createMangaTile({
             id,
             image,
             title: createIconText({ text: title }),
             subtitleText: createIconText({ text: subtitle }),
-            primaryText: createIconText({ text: rating, icon: 'star.fill' }),
-            secondaryText: createIconText({ text: time.toDateString(), icon: 'clock.fill' })
         }))
     }
     return manga
