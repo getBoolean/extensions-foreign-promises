@@ -76,9 +76,14 @@ describe('BainianManga Tests', function () {
     it("Testing Home-Page aquisition", async() => {
         let homePages = await wrapper.getHomePageSections(source)
         expect(homePages, "No response from server").to.exist
-        expect(homePages[0], "No top weekly section available").to.exist
-        expect(homePages[1], "No latest updates section available").to.exist
+        expect(homePages[0], "No recommended section available").to.exist
+        expect(homePages[1], "No hot section available").to.exist
         expect(homePages[2], "No new manga section available").to.exist
+    })
+
+    it("Testing ViewMore aquisition", async() => {
+        let viewMore = await wrapper.getViewMoreItems(source, 'hot_comics', {page: 2})
+        expect(viewMore, "No response from server").to.be.not.empty;
     })
 
 })
