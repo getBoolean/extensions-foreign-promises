@@ -12,7 +12,7 @@ import {
     RequestHeaders,
     TagType
   } from "paperback-extensions-common"
-  import { generateSearch, isLastPage, parseChapterDetails, parseChapters, parseHomeSections, parseMangaDetails, parseSearch, parseTags, parseUpdatedManga, parseViewMore, UpdatedManga } from "./BainianMangaParser"
+  import { generateSearch, isLastPage, parseChapterPageDetails, parseChapters, parseHomeSections, parseMangaDetails, parseSearch, parseTags, parseUpdatedManga, parseViewMore, UpdatedManga } from "./BainianMangaParser"
   
   const BM_DOMAIN = 'https://m.bnmanhua.com';
   const method = 'GET';
@@ -52,6 +52,7 @@ import {
       return parseMangaDetails($, mangaId)
     }
   
+
     async getChapters(mangaId: string): Promise<Chapter[]> {
       const request = createRequestObject({
         url: `${BM_DOMAIN}/comic/`,
@@ -64,22 +65,59 @@ import {
       return parseChapters($, mangaId)
     }
   
+
     async getChapterDetails(mangaId: string, chapterId: string): Promise<ChapterDetails> {
-      const request = createRequestObject({
-        url: `${BM_DOMAIN}/comic/`,
-        method,
-        headers: {
-        //   "content-type": "application/x-www-form-urlencoded",
-        //   Cookie: 'content_lazyload=off'
-        },
-        param: `${mangaId}/${chapterId}`
-      })
-  
-      const response = await this.requestManager.schedule(request, 1)
-      const $ = this.cheerio.load(response.data)
-      return parseChapterDetails($, mangaId, chapterId)
+        let request = createRequestObject({
+            url: `${BM_DOMAIN}/comic/`,
+            method,
+            headers,
+            param: `${mangaId}/${chapterId}.html`
+        })
+
+        // Get max number of pages
+        const response = await this.requestManager.schedule(request, 1)
+        const $ = this.cheerio.load(response.data)
+
+        const numPages = Number($('span[id=k_total]', '.bo_tit').text())
+        let page = 0
+
+        // Create request objects for every page
+        let chapterRequests = []
+        for (let i = 1; i <= numPages; i++){
+            chapterRequests.push(createRequestObject({
+                url: `${BM_DOMAIN}/comic/`,
+                method,
+                headers,
+                param: `${mangaId}/${chapterId}.html?p=${page}`
+            }))
+        }
+
+        let chapterResponses = []
+        for (const chapterRequestsItem of chapterRequests){
+            chapterResponses.push(await this.requestManager.schedule(chapterRequestsItem, 1))
+        }
+
+        let chapterCheerios = []
+        for (const chapterResponsesItem of chapterResponses){
+            chapterCheerios.push(this.cheerio.load(chapterResponsesItem.data))
+        }
+
+        // Get image from every page
+        let pages = []
+        for (const chapterCheeriosItem of chapterCheerios){
+            pages.push(parseChapterPageDetails(chapterCheeriosItem))
+        }
+        
+
+        return createChapterDetails({
+            id: chapterId,
+            mangaId: mangaId,
+            pages,
+            longStrip: false
+        })
     }
   
+
     async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
       let page = 1
       let updatedManga: UpdatedManga = {
@@ -107,6 +145,7 @@ import {
       }
     }
   
+    // TODO
     async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
       // Give Paperback a skeleton of what these home sections should look like to pre-render them
       const section1 = createHomeSection({ id: 'a_recommended', title: '推荐漫画' })
@@ -125,6 +164,7 @@ import {
       parseHomeSections($, sections, sectionCallback)
     }
   
+
     async searchRequest(query: SearchRequest, metadata: any): Promise<PagedResults> {
       let page : number = metadata?.page ?? 1
       const search = generateSearch(query)
@@ -146,6 +186,7 @@ import {
       })
     }
   
+
     async getTags(): Promise<TagSection[] | null> {
       const request = createRequestObject({
         url: `${BM_DOMAIN}/page/list.html`,
@@ -158,6 +199,7 @@ import {
       return parseTags($)
     }
   
+
     async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
       let page : number = metadata?.page ?? 1
       let param = ''
@@ -184,6 +226,7 @@ import {
       })
     }
   
+
     globalRequestHeaders(): RequestHeaders {
       return {
         referer: BM_DOMAIN

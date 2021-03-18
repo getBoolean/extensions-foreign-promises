@@ -1,14 +1,14 @@
 import { Chapter, ChapterDetails, HomeSection, LanguageCode, Manga, MangaStatus, MangaTile, MangaUpdates, PagedResults, SearchRequest, TagSection } from "paperback-extensions-common";
 
 export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
-    const panel = $('.panel-story-info')
-    const title = $('.img-loading', panel).attr('title') ?? ''
-    const image = $('.img-loading', panel).attr('src') ?? ''
-    let table = $('.variations-tableInfo', panel)
-    let author = ''
+    const imageElement = $('div.img')
+    const infoElement = $('div.data')
+    const title = $('h4', infoElement).text() ?? 'No title'
+    const image = $('.mip-fill-content', imageElement).attr('src') ?? ''
+    let author = $('.dir', infoElement).text().trim().replace('作者：', '')
     let artist = ''
     let rating = 0
-    let status = MangaStatus.ONGOING
+    let status = $('span.list_item ').text() == '连载中' ? MangaStatus.ONGOING : MangaStatus.COMPLETED
     let titles = [title]
     let follows = 0
     let views = 0
@@ -17,50 +17,20 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
 
     const tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] })]
 
-    for (const row of $('tr', table).toArray()) {
-      if ($(row).find('.info-alternative').length > 0) {
-        const alts = $('h2', table).text().split(/,|;/)
-        for (const alt of alts) {
-          titles.push(alt.trim())
-        }
-      }
-      else if ($(row).find('.info-author').length > 0) {
-        const autart = $('.table-value', row).find('a').toArray()
-        author = $(autart[0]).text()
-        if (autart.length > 1) {
-          artist = $(autart[1]).text()
-        }
-      }
-      else if ($(row).find('.info-status').length > 0) {
-        status = $('.table-value', row).text() == 'Ongoing' ? MangaStatus.ONGOING : MangaStatus.COMPLETED
-      }
-      else if ($(row).find('.info-genres').length > 0) {
-        const elems = $('.table-value', row).find('a').toArray()
-        for (const elem of elems) {
-          const text = $(elem).text()
-          const id = $(elem).attr('href')?.split('/').pop()?.split('-').pop() ?? ''
-          if (text.toLowerCase().includes('smut')) {
+    const elems = $('.yac', infoElement).find('a').toArray()
+    for (const elem of elems) {
+        const text = $(elem).text()
+        const id = $(elem).attr('href')?.split('/').pop()?.split('-').pop() ?? ''
+        if (text.toLowerCase().includes('biantai.html')) { // No hentai on BainianManga
             hentai = true
-          }
-          tagSections[0].tags.push(createTag({ id: id, label: text }))
         }
-      }
+        tagSections[0].tags.push(createTag({ id: id, label: text }))
     }
 
-    table = $('.story-info-right-extent', panel)
-    for (const row of $('p', table).toArray()) {
-      if ($(row).find('.info-time').length > 0) {
-        const time = new Date($('.stre-value', row).text().replace(/(-*(AM)*(PM)*)/g, ''))
-        lastUpdate = time.toDateString()
-      }
-      else if ($(row).find('.info-view').length > 0) {
-        views = Number($('.stre-value', row).text().replace(/,/g, ''))
-      }
-    }
+    const time = new Date($('.act', infoElement).text().split('  /  ')[0].replace('更新：', ''))
+    lastUpdate = time.toDateString()
 
-    rating = Number($('[property=v\\:average]', table).text())
-    follows = Number($('[property=v\\:votes]', table).text())
-    const summary = $('.panel-story-info-description', panel).text()
+    const summary = $('div.tbox_js').text().trim()
 
     return createManga({
       id: mangaId,
@@ -80,12 +50,25 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
 }
 
 export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
-    const allChapters = $('.row-content-chapter', '.body-site')
+    const allChapters = $('li', '.list_block ').toArray()
     const chapters: Chapter[] = []
-    for (let chapter of $('li', allChapters).toArray()) {
-        const id: string = $('a', chapter).attr('href')?.split('/').pop() ?? ''
+    let index
+    for (let chapter of allChapters) {
+        const id: string = ( $('a', chapter).attr('href')?.split('/').pop() ?? '' ).replace('.html', '')
         const name: string = $('a', chapter).text() ?? ''
-        const chapNum: number = Number(/Chapter ([0-9]\d*(\.\d+)?)/g.exec(name)?.[1] ?? '')
+        let tempChapNum: number = Number((name.match(/^第(\d+)/) ?? [0,0] )[1])
+
+        if (tempChapNum == 0)
+        {
+            index = allChapters.indexOf(chapter)
+            if (index < allChapters.length - 1)
+            {
+                const nextName: string = $('a', allChapters[index+1]).text() ?? ''
+                tempChapNum = Number((nextName.match(/^第(\d+)/) ?? [0,0] )[1]) + 0.5
+            }
+        }
+
+        const chapNum: number = tempChapNum
         const time: Date = new Date($('.chapter-time', chapter).attr('title') ?? '')
         chapters.push(createChapter({
             id,
@@ -99,17 +82,10 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
     return chapters
 }
 
-export const parseChapterDetails = ($: CheerioStatic, mangaId: string, chapterId: string): ChapterDetails => {
-    const pages: string[] = []
-    for (let item of $('img', '.container-chapter-reader').toArray()) {
-      pages.push($(item).attr('src') ?? '')
-    }
-    return createChapterDetails({
-        id: chapterId,
-        mangaId: mangaId,
-        pages,
-        longStrip: false
-      })
+export const parseChapterPageDetails = ($: CheerioStatic): string => {
+    const image = $('img').attr('src') ?? ''
+    
+    return image
 }
 
 export interface UpdatedManga {
@@ -284,13 +260,8 @@ export const parseViewMore = ($: CheerioStatic): MangaTile[] => {
 }
 
 export const isLastPage = ($: CheerioStatic): boolean => {
-    let current = $('.page-select').text()
-    let total = $('.page-last').text()
+    const pagenav = $('.pagination')
+    let disabled = $(pagenav).find('.disabled').length > 0
 
-    if (current) {
-        total = (/(\d+)/g.exec(total) ?? [''])[0]
-        return (+total) === (+current)
-    }
-
-    return true
+    return disabled
 }
