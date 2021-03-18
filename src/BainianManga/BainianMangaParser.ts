@@ -34,7 +34,7 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): [Manga, st
 
     const summary = parsedJson.description
 
-    console.log('image: ' + image)
+    // console.log('image: ' + image)
     // let tempImage = image.replace('https://', '').replace('http://', '')
     // let tempImageDomain = tempImage.substring(0, tempImage.indexOf('/')) // Set imageDomain if it is different
     // this.imageDomain = `https://${tempImageDomain}`
@@ -94,15 +94,15 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
 export const parseChapterDetails = (imageDomain: string, mangaId: string, chapterId: string, data: any): ChapterDetails => {
     const baseImageURL = imageDomain
     const imageCode = data?.match(/var z_img='(.*?)';/)?.pop()
-    console.log("data?.match(/var z_img='(.*?)';/): " + data?.match(/var z_img='(.*?)';/))
-    console.log('imageCode: ' + imageCode)
+    // console.log("data?.match(/var z_img='(.*?)';/): " + data?.match(/var z_img='(.*?)';/))
+    // console.log('imageCode: ' + imageCode)
 
     let pages : string[] = []
     if (imageCode) {
         const imagePaths = JSON.parse(imageCode) as string[]
         pages = imagePaths.map(imagePath => `${baseImageURL}/${imagePath}`)
     }
-    console.log(pages)
+    // console.log(pages)
 
     return createChapterDetails({
         id: chapterId,
@@ -277,6 +277,7 @@ export const parseTags = ($: CheerioStatic): TagSection[] | null => {
 
 
 export const parseViewMore = ($: CheerioStatic): MangaTile[] => {
+    console.log('parseViewMore($)')
     const panel = $('.tbox_m')
     const allItems = $('.vbox', panel).toArray()
     const manga: MangaTile[] = []

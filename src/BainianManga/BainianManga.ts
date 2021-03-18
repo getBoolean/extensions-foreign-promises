@@ -22,7 +22,7 @@ import {
   };
   
   export const BainianMangaInfo: SourceInfo = {
-    version: '0.0.17',
+    version: '0.0.18',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -59,11 +59,12 @@ import {
 
         let result : [Manga, string] = parseMangaDetails($, mangaId)
 
+        // Hacky solution to get the image domain
         // Get image domain from (ex:) https://img.lxhy88.com/zhang/26110/1602252/d41ae644ddcd2e1edb8141f0b5abf8c1.jpg
         const image = result[1].replace('https://', '').replace('http://', '')
         const tempImageDomain = image.substring(0, image.indexOf('/')) // Set new image domain
         this.imageDomain = `https://${tempImageDomain}`
-        console.log(this.imageDomain)
+        // console.log(this.imageDomain)
 
         return result[0]
     }
@@ -198,6 +199,7 @@ import {
   
 
     async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+        console.log('getViewMoreItems($)')
         let page : number = metadata?.page ?? 1
         let param = ''
         if (homepageSectionId === 'hot_comics')
