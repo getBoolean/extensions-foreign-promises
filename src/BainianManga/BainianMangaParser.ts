@@ -20,14 +20,15 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): [Manga, st
     const tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] })]
     
     const elems = $('.yac', infoElement).find('a').toArray()
-    for (const elem of elems) {
-        const text = $(elem).text()
-        const id = (($(elem).attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
-        if (text.toLowerCase().includes('biantai')) { // No hentai on BainianManga
-            hentai = true
-        }
-        tagSections[0].tags.push(createTag({ id: id, label: text }))
-    }
+    // for (const elem of elems) {
+    //     const text = $(elem).text()
+    //     // const id = (($(elem).attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
+    //     // if (text.toLowerCase().includes('biantai')) { // No hentai on BainianManga
+    //     //     hentai = true
+    //     // }
+    //     tagSections[0].tags.push(createTag({ id: text, label: text }))
+    // }
+    tagSections[0].tags = elems.map((elem) => createTag({ id: $(elem).text(), label: $(elem).text() }))
 
     const time = new Date(parsedJson.upDate)
     lastUpdate = time.toDateString()
@@ -58,6 +59,10 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): [Manga, st
 
 
 export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
+    const json = $('[type=application\\/ld\\+json]').html()?.replace(/\t*\n*/g, '') ?? ''
+    const parsedJson = JSON.parse(json)
+    const time = new Date(parsedJson.upDate) // Set time for all chapters to be the last updated time
+
     const allChapters = $('li', '.list_block ').toArray()
     const chapters: Chapter[] = []
     let index
@@ -77,7 +82,6 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
         }
 
         const chapNum: number = tempChapNum
-        const time: Date = new Date($('.chapter-time', chapter).attr('title') ?? '')
         chapters.push(createChapter({
             id,
             mangaId,
@@ -268,9 +272,9 @@ export const parseTags = ($: CheerioStatic): TagSection[] | null => {
         tags: []
     })
     for (let item of allItems) {
-        let id = ($(item).attr('href')?.split('/').pop() ?? '').replace('.html', '')
+        // let id = ($(item).attr('href')?.split('/').pop() ?? '').replace('.html', '')
         let label = $(item).text()
-        genres.tags.push(createTag({ id: id, label: label }))
+        genres.tags.push(createTag({ id: label, label: label }))
     }
     return [genres]
 }
