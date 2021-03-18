@@ -20,25 +20,12 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): [Manga, st
     const tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] })]
     
     const elems = $('.yac', infoElement).find('a').toArray()
-    // for (const elem of elems) {
-    //     const text = $(elem).text()
-    //     // const id = (($(elem).attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
-    //     // if (text.toLowerCase().includes('biantai')) { // No hentai on BainianManga
-    //     //     hentai = true
-    //     // }
-    //     tagSections[0].tags.push(createTag({ id: text, label: text }))
-    // }
     tagSections[0].tags = elems.map((elem) => createTag({ id: $(elem).text(), label: $(elem).text() }))
 
     const time = new Date(parsedJson.upDate)
     lastUpdate = time.toDateString()
 
     const summary = parsedJson.description
-
-    // console.log('image: ' + image)
-    // let tempImage = image.replace('https://', '').replace('http://', '')
-    // let tempImageDomain = tempImage.substring(0, tempImage.indexOf('/')) // Set imageDomain if it is different
-    // this.imageDomain = `https://${tempImageDomain}`
 
     return [createManga({
         id: mangaId,
