@@ -452,11 +452,11 @@ class BainianManga extends paperback_extensions_common_1.Source {
                 method,
             });
             const request2 = createRequestObject({
-                url: `${BM_DOMAIN}/page/hot.html`,
+                url: `${BM_DOMAIN}/page/hot/1.html`,
                 method,
             });
             const request3 = createRequestObject({
-                url: `${BM_DOMAIN}/page/new.html`,
+                url: `${BM_DOMAIN}/page/new/1.html`,
                 method,
             });
             const response1 = yield this.requestManager.schedule(request1, 1);
@@ -523,6 +523,7 @@ class BainianManga extends paperback_extensions_common_1.Source {
             const response = yield this.requestManager.schedule(request, 1);
             const $ = this.cheerio.load(response.data);
             const manga = BainianMangaParser_1.parseViewMore($);
+            console.log('isLastPage($)' + BainianMangaParser_1.isLastPage($));
             metadata = !BainianMangaParser_1.isLastPage($) ? { page: page + 1 } : undefined;
             return createPagedResults({
                 results: manga,
@@ -796,7 +797,7 @@ exports.parseViewMore = ($) => {
 };
 exports.isLastPage = ($) => {
     const pagenav = $('.pagination');
-    let disabled = $(pagenav).find('.disabled').length > 0;
+    let disabled = $('.disabled', pagenav).length > 0;
     return disabled;
 };
 
