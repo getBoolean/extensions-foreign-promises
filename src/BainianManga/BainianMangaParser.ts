@@ -206,16 +206,16 @@ export const parseSearch = ($: CheerioStatic): MangaTile[] => {
     return manga
 }
 
-// TODO
+
 export const parseTags = ($: CheerioStatic): TagSection[] | null => {
-    const panel = $('.advanced-search-tool-genres-list')
+    const allItems = $('.tbox a').toArray()
     const genres = createTagSection({
       id: 'genre',
       label: 'Genre',
       tags: []
     })
-    for (let item of $('span', panel).toArray()) {
-      let id = $(item).attr('data-i') ?? ''
+    for (let item of allItems) {
+      let id = ($(item).attr('href')?.split('/').pop() ?? '').replace('.html', '')
       let label = $(item).text()
       genres.tags.push(createTag({ id: id, label: label }))
     }
