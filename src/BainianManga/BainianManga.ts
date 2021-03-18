@@ -81,31 +81,21 @@ import {
         const numPages = Number($('span[id=k_total]', '.bo_tit').text())
         let page = 0
 
-        // Create request objects for every page
-        let chapterRequests = []
+        // Create request objects for every page and get the image
+        let pages = []
         for (let i = 1; i <= numPages; i++){
-            chapterRequests.push(createRequestObject({
+            let pageRequest = createRequestObject({
                 url: `${BM_DOMAIN}/comic/`,
                 method,
                 headers,
                 param: `${mangaId}/${chapterId}.html?p=${page}`
-            }))
-        }
+            })
 
-        let chapterResponses = []
-        for (const chapterRequestsItem of chapterRequests){
-            chapterResponses.push(await this.requestManager.schedule(chapterRequestsItem, 1))
-        }
+            let pageResponse = await this.requestManager.schedule(pageRequest, 1)
 
-        let chapterCheerios = []
-        for (const chapterResponsesItem of chapterResponses){
-            chapterCheerios.push(this.cheerio.load(chapterResponsesItem.data))
-        }
+            let page$ = this.cheerio.load(pageResponse.data)
 
-        // Get image from every page
-        let pages = []
-        for (const chapterCheeriosItem of chapterCheerios){
-            pages.push(parseChapterPageDetails(chapterCheeriosItem))
+            pages.push(parseChapterPageDetails(page$))
         }
         
 
