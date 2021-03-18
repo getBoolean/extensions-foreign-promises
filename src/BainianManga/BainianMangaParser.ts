@@ -268,7 +268,7 @@ export const parseTags = ($: CheerioStatic): TagSection[] | null => {
 
 
 export const parseViewMore = ($: CheerioStatic): MangaTile[] => {
-    console.log('parseViewMore($)')
+    // console.log('parseViewMore($)')
     const panel = $('.tbox_m')
     const allItems = $('.vbox', panel).toArray()
     const manga: MangaTile[] = []
@@ -290,8 +290,8 @@ export const parseViewMore = ($: CheerioStatic): MangaTile[] => {
 
 
 export const isLastPage = ($: CheerioStatic): boolean => {
-    const pagenav = $('.pagination')
-    let disabled = $('.disabled', pagenav).length > 0
+    // const pagenav = $('.pagination')
+    let disabled = $('li', $('.pagination')).last().hasClass('disabled')
 
     return disabled
 }

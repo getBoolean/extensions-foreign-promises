@@ -82,7 +82,7 @@ describe('BainianManga Tests', function () {
     })
 
     it("Testing ViewMore aquisition", async() => {
-        let viewMore = await wrapper.getViewMoreItems(source, 'hot_comics', {page: 2})
+        let viewMore = await wrapper.getViewMoreItems(source, 'z_new_updates', {page: 889})
         expect(viewMore, "No response from server").to.be.not.empty;
     })
 

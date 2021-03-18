@@ -22,7 +22,7 @@ import {
   };
   
   export const BainianMangaInfo: SourceInfo = {
-    version: '0.0.19',
+    version: '0.0.20',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -199,7 +199,7 @@ import {
   
 
     async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
-        console.log('getViewMoreItems($)')
+        // console.log('getViewMoreItems($)')
         let page : number = metadata?.page ?? 1
         let param = ''
         if (homepageSectionId === 'hot_comics')
@@ -217,7 +217,7 @@ import {
         const response = await this.requestManager.schedule(request, 1)
         const $ = this.cheerio.load(response.data)
         const manga = parseViewMore($)
-        console.log('isLastPage($)' + isLastPage($))
+        // console.log('isLastPage($) ' + isLastPage($))
         metadata = !isLastPage($) ? { page: page + 1 } : undefined
 
         return createPagedResults({
