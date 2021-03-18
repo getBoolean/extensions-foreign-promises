@@ -608,7 +608,7 @@ exports.parseChapters = ($, mangaId) => {
             index = allChapters.indexOf(chapter);
             if (index < allChapters.length - 1) {
                 const nextName = (_e = $('a', allChapters[index + 1]).text()) !== null && _e !== void 0 ? _e : '';
-                tempChapNum = Number(((_f = nextName.match(/^第(\d+)/)) !== null && _f !== void 0 ? _f : [0, 0])[1]) + 0.5;
+                tempChapNum = Number((_f = nextName.match(/\d+/)) !== null && _f !== void 0 ? _f : 0) + 0.5;
             }
         }
         const chapNum = tempChapNum;
