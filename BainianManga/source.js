@@ -345,7 +345,7 @@ const headers = {
     referer: BM_DOMAIN
 };
 exports.BainianMangaInfo = {
-    version: '0.0.20',
+    version: '1.0.0',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -354,10 +354,6 @@ exports.BainianMangaInfo = {
     hentaiSource: false,
     websiteBaseURL: `${BM_DOMAIN}/comic.html`,
     sourceTags: [
-        {
-            text: "WIP",
-            type: paperback_extensions_common_1.TagType.RED
-        },
         {
             text: "中文",
             type: paperback_extensions_common_1.TagType.GREY
