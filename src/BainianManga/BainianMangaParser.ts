@@ -2,10 +2,12 @@ import { Chapter, ChapterDetails, HomeSection, LanguageCode, Manga, MangaStatus,
 
 
 export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
-    const imageElement = $('div.img')
+    const json = $('[type=application\\/ld\\+json]').html()?.replace(/\t*\n*/g, '') ?? ''
+    const parsedJson = JSON.parse(json)
+
     const infoElement = $('div.data')
-    const title = $('h4', infoElement).text() ?? 'No title'
-    const image = $('.mip-fill-content', imageElement).attr('src') ?? ''
+    const title = parsedJson.title
+    const image = parsedJson.images[0]
     let author = $('.dir', infoElement).text().trim().replace('作者：', '')
     let artist = ''
     let rating = 0
@@ -28,10 +30,10 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
         tagSections[0].tags.push(createTag({ id: id, label: text }))
     }
 
-    const time = new Date($('.act', infoElement).text().split('  /  ')[0].replace('更新：', ''))
+    const time = new Date(parsedJson.upDate)
     lastUpdate = time.toDateString()
 
-    const summary = $('div.tbox_js').text().trim()
+    const summary = parsedJson.description
 
     return createManga({
         id: mangaId,
