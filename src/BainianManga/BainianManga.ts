@@ -30,10 +30,14 @@ import {
     hentaiSource: false,
     websiteBaseURL: `${BM_DOMAIN}/comic.html`,
     sourceTags: [
-      {
-        text: "WIP",
-        type: TagType.RED
-      }
+        {
+            text: "WIP",
+            type: TagType.RED
+        },
+        {
+            text: "Chinese",
+            type: TagType.GREY
+        }
     ]
   }
   
@@ -41,28 +45,28 @@ import {
     getMangaShareUrl(mangaId: string): string | null { return `${BM_DOMAIN}/comic/${mangaId}` }
   
     async getMangaDetails(mangaId: string): Promise<Manga> {
-      const request = createRequestObject({
-        url: `${BM_DOMAIN}/comic/`,
-        method,
-        param: `${mangaId}.html`
-      })
-  
-      const response = await this.requestManager.schedule(request, 1)
-      const $ = this.cheerio.load(response.data)
-      return parseMangaDetails($, mangaId)
+        const request = createRequestObject({
+            url: `${BM_DOMAIN}/comic/`,
+            method,
+            param: `${mangaId}.html`
+        })
+
+        const response = await this.requestManager.schedule(request, 1)
+        const $ = this.cheerio.load(response.data)
+        return parseMangaDetails($, mangaId)
     }
   
 
     async getChapters(mangaId: string): Promise<Chapter[]> {
-      const request = createRequestObject({
-        url: `${BM_DOMAIN}/comic/`,
-        method,
-        param: `${mangaId}.html`
-      })
-  
-      const response = await this.requestManager.schedule(request, 1)
-      const $ = this.cheerio.load(response.data)
-      return parseChapters($, mangaId)
+        const request = createRequestObject({
+            url: `${BM_DOMAIN}/comic/`,
+            method,
+            param: `${mangaId}.html`
+        })
+
+        const response = await this.requestManager.schedule(request, 1)
+        const $ = this.cheerio.load(response.data)
+        return parseChapters($, mangaId)
     }
   
 
@@ -109,135 +113,135 @@ import {
   
 
     async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
-      let page = 1
-      let updatedManga: UpdatedManga = {
-        ids: [],
-        loadMore: true
-      }
-  
-      while (updatedManga.loadMore) {
+        let page = 1
+            let updatedManga: UpdatedManga = {
+            ids: [],
+            loadMore: true
+        }
+
+        while (updatedManga.loadMore) {
         const request = createRequestObject({
-          url: `${BM_DOMAIN}/page/new/`,
-          method,
-          headers,
-          param: `${String(page++)}.html`
+            url: `${BM_DOMAIN}/page/new/`,
+            method,
+            headers,
+            param: `${String(page++)}.html`
         })
-  
+
         const response = await this.requestManager.schedule(request, 1)
         const $ = this.cheerio.load(response.data)
         updatedManga = parseUpdatedManga($, time, ids)
-  
+
         if (updatedManga.ids.length > 0) {
-          mangaUpdatesFoundCallback(createMangaUpdates({
+            mangaUpdatesFoundCallback(createMangaUpdates({
             ids: updatedManga.ids
-          }))
+            }))
         }
-      }
+        }
     }
   
  
     async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
-      // Give Paperback a skeleton of what these home sections should look like to pre-render them
-      const section1 = createHomeSection({ id: 'a_recommended', title: '推荐漫画' })
-      const section3 = createHomeSection({ id: 'hot_comics', title: '热门漫画', view_more: true })
-      const section2 = createHomeSection({ id: 'z_new_updates', title: '最近更新', view_more: true })
-  
-      // Fill the homsections with data
-      const request1 = createRequestObject({
-        url: `${BM_DOMAIN}/comic.html`,
-        method,
-      })
+        // Give Paperback a skeleton of what these home sections should look like to pre-render them
+        const section1 = createHomeSection({ id: 'a_recommended', title: '推荐漫画' })
+        const section3 = createHomeSection({ id: 'hot_comics', title: '热门漫画', view_more: true })
+        const section2 = createHomeSection({ id: 'z_new_updates', title: '最近更新', view_more: true })
 
-      const request2 = createRequestObject({
-        url: `${BM_DOMAIN}/page/hot.html`,
-        method,
-      })
+        // Fill the homsections with data
+        const request1 = createRequestObject({
+            url: `${BM_DOMAIN}/comic.html`,
+            method,
+        })
 
-      const request3 = createRequestObject({
-        url: `${BM_DOMAIN}/page/new.html`,
-        method,
-      })
-  
-      const response1 = await this.requestManager.schedule(request1, 1)
-      const $1 = this.cheerio.load(response1.data)
+        const request2 = createRequestObject({
+            url: `${BM_DOMAIN}/page/hot.html`,
+            method,
+        })
 
-      const response2 = await this.requestManager.schedule(request2, 1)
-      const $2 = this.cheerio.load(response2.data)
+        const request3 = createRequestObject({
+            url: `${BM_DOMAIN}/page/new.html`,
+            method,
+        })
 
-      const response3 = await this.requestManager.schedule(request3, 1)
-      const $3 = this.cheerio.load(response3.data)
+        const response1 = await this.requestManager.schedule(request1, 1)
+        const $1 = this.cheerio.load(response1.data)
 
-      parseHomeSections($1, section1, sectionCallback)
-      parseHotManga($2, section2, sectionCallback)
-      parseNewManga($3, section3, sectionCallback)
+        const response2 = await this.requestManager.schedule(request2, 1)
+        const $2 = this.cheerio.load(response2.data)
+
+        const response3 = await this.requestManager.schedule(request3, 1)
+        const $3 = this.cheerio.load(response3.data)
+
+        parseHomeSections($1, section1, sectionCallback)
+        parseHotManga($2, section2, sectionCallback)
+        parseNewManga($3, section3, sectionCallback)
     }
   
 
     async searchRequest(query: SearchRequest, metadata: any): Promise<PagedResults> {
-      let page : number = metadata?.page ?? 1
-      const search = generateSearch(query)
-      const request = createRequestObject({
-        url: `${BM_DOMAIN}/search/`,
-        method,
-        headers,
-        param: `${search}/${page}.html`
-      })
-  
-      const response = await this.requestManager.schedule(request, 1)
-      const $ = this.cheerio.load(response.data)
-      const manga = parseSearch($)
-      metadata = !isLastPage($) ? {page: page + 1} : undefined
-      
-      return createPagedResults({
-        results: manga,
-        metadata
-      })
+        let page : number = metadata?.page ?? 1
+        const search = generateSearch(query)
+        const request = createRequestObject({
+            url: `${BM_DOMAIN}/search/`,
+            method,
+            headers,
+            param: `${search}/${page}.html`
+        })
+
+        const response = await this.requestManager.schedule(request, 1)
+        const $ = this.cheerio.load(response.data)
+        const manga = parseSearch($)
+        metadata = !isLastPage($) ? {page: page + 1} : undefined
+        
+        return createPagedResults({
+            results: manga,
+            metadata
+        })
     }
   
 
     async getTags(): Promise<TagSection[] | null> {
-      const request = createRequestObject({
-        url: `${BM_DOMAIN}/page/list.html`,
-        method,
-        headers,
-      })
-  
-      const response = await this.requestManager.schedule(request, 1)
-      const $ = this.cheerio.load(response.data)
-      return parseTags($)
+        const request = createRequestObject({
+            url: `${BM_DOMAIN}/page/list.html`,
+            method,
+            headers,
+        })
+
+        const response = await this.requestManager.schedule(request, 1)
+        const $ = this.cheerio.load(response.data)
+        return parseTags($)
     }
   
 
     async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
-      let page : number = metadata?.page ?? 1
-      let param = ''
-      if (homepageSectionId === 'hot_comics')
-        param = `/page/hot/${page}.html`
-      else if (homepageSectionId === 'z_new_updates')
-        param = `/page/new/${page}.html`
-      else return Promise.resolve(null)
-  
-      const request = createRequestObject({
-        url: `${BM_DOMAIN}`,
-        method,
-        param,
-      })
-  
-      const response = await this.requestManager.schedule(request, 1)
-      const $ = this.cheerio.load(response.data)
-      const manga = parseViewMore($)
-      metadata = !isLastPage($) ? { page: page + 1 } : undefined
-  
-      return createPagedResults({
-        results: manga,
-        metadata
-      })
+        let page : number = metadata?.page ?? 1
+        let param = ''
+        if (homepageSectionId === 'hot_comics')
+            param = `/page/hot/${page}.html`
+        else if (homepageSectionId === 'z_new_updates')
+            param = `/page/new/${page}.html`
+        else return Promise.resolve(null)
+
+        const request = createRequestObject({
+            url: `${BM_DOMAIN}`,
+            method,
+            param,
+        })
+
+        const response = await this.requestManager.schedule(request, 1)
+        const $ = this.cheerio.load(response.data)
+        const manga = parseViewMore($)
+        metadata = !isLastPage($) ? { page: page + 1 } : undefined
+
+        return createPagedResults({
+            results: manga,
+            metadata
+        })
     }
   
 
     globalRequestHeaders(): RequestHeaders {
-      return {
-        referer: BM_DOMAIN
-      }
+        return {
+            referer: BM_DOMAIN
+        }
     }
   }
