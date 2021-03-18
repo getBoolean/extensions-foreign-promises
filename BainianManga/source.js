@@ -345,7 +345,7 @@ const headers = {
     referer: BM_DOMAIN
 };
 exports.BainianMangaInfo = {
-    version: '0.0.18',
+    version: '0.0.19',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -545,7 +545,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.isLastPage = exports.parseViewMore = exports.parseTags = exports.parseSearch = exports.generateSearch = exports.parseNewManga = exports.parseHotManga = exports.parseHomeSections = exports.parseUpdatedManga = exports.parseChapterDetails = exports.parseChapters = exports.parseMangaDetails = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 exports.parseMangaDetails = ($, mangaId) => {
-    var _a, _b, _c, _d;
+    var _a, _b;
     const json = (_b = (_a = $('[type=application\\/ld\\+json]').html()) === null || _a === void 0 ? void 0 : _a.replace(/\t*\n*/g, '')) !== null && _b !== void 0 ? _b : '';
     const parsedJson = JSON.parse(json);
     const infoElement = $('div.data');
@@ -562,14 +562,15 @@ exports.parseMangaDetails = ($, mangaId) => {
     let hentai = false;
     const tagSections = [createTagSection({ id: '0', label: 'genres', tags: [] })];
     const elems = $('.yac', infoElement).find('a').toArray();
-    for (const elem of elems) {
-        const text = $(elem).text();
-        const id = ((_d = ((_c = $(elem).attr('href')) !== null && _c !== void 0 ? _c : '').split('/').pop()) !== null && _d !== void 0 ? _d : '').replace('.html', '');
-        if (text.toLowerCase().includes('biantai')) { // No hentai on BainianManga
-            hentai = true;
-        }
-        tagSections[0].tags.push(createTag({ id: id, label: text }));
-    }
+    // for (const elem of elems) {
+    //     const text = $(elem).text()
+    //     // const id = (($(elem).attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
+    //     // if (text.toLowerCase().includes('biantai')) { // No hentai on BainianManga
+    //     //     hentai = true
+    //     // }
+    //     tagSections[0].tags.push(createTag({ id: text, label: text }))
+    // }
+    tagSections[0].tags = elems.map((elem) => createTag({ id: $(elem).text(), label: $(elem).text() }));
     const time = new Date(parsedJson.upDate);
     lastUpdate = time.toDateString();
     const summary = parsedJson.description;
@@ -594,23 +595,25 @@ exports.parseMangaDetails = ($, mangaId) => {
         }), image];
 };
 exports.parseChapters = ($, mangaId) => {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f, _g, _h;
+    const json = (_b = (_a = $('[type=application\\/ld\\+json]').html()) === null || _a === void 0 ? void 0 : _a.replace(/\t*\n*/g, '')) !== null && _b !== void 0 ? _b : '';
+    const parsedJson = JSON.parse(json);
+    const time = new Date(parsedJson.upDate); // Set time for all chapters to be the last updated time
     const allChapters = $('li', '.list_block ').toArray();
     const chapters = [];
     let index;
     for (let chapter of allChapters) {
-        const id = ((_b = (_a = $('a', chapter).attr('href')) === null || _a === void 0 ? void 0 : _a.split('/').pop()) !== null && _b !== void 0 ? _b : '').replace('.html', '');
-        const name = (_c = $('a', chapter).text()) !== null && _c !== void 0 ? _c : '';
-        let tempChapNum = Number((_d = name.match(/\d+/)) !== null && _d !== void 0 ? _d : 0);
+        const id = ((_d = (_c = $('a', chapter).attr('href')) === null || _c === void 0 ? void 0 : _c.split('/').pop()) !== null && _d !== void 0 ? _d : '').replace('.html', '');
+        const name = (_e = $('a', chapter).text()) !== null && _e !== void 0 ? _e : '';
+        let tempChapNum = Number((_f = name.match(/\d+/)) !== null && _f !== void 0 ? _f : 0);
         if (tempChapNum == 0) {
             index = allChapters.indexOf(chapter);
             if (index < allChapters.length - 1) {
-                const nextName = (_e = $('a', allChapters[index + 1]).text()) !== null && _e !== void 0 ? _e : '';
-                tempChapNum = Number((_f = nextName.match(/\d+/)) !== null && _f !== void 0 ? _f : 0) + 0.5;
+                const nextName = (_g = $('a', allChapters[index + 1]).text()) !== null && _g !== void 0 ? _g : '';
+                tempChapNum = Number((_h = nextName.match(/\d+/)) !== null && _h !== void 0 ? _h : 0) + 0.5;
             }
         }
         const chapNum = tempChapNum;
-        const time = new Date((_g = $('.chapter-time', chapter).attr('title')) !== null && _g !== void 0 ? _g : '');
         chapters.push(createChapter({
             id,
             mangaId,
@@ -761,7 +764,6 @@ exports.parseSearch = ($) => {
     return manga;
 };
 exports.parseTags = ($) => {
-    var _a, _b;
     const allItems = $('.tbox a').toArray();
     const genres = createTagSection({
         id: 'genre',
@@ -769,9 +771,9 @@ exports.parseTags = ($) => {
         tags: []
     });
     for (let item of allItems) {
-        let id = ((_b = (_a = $(item).attr('href')) === null || _a === void 0 ? void 0 : _a.split('/').pop()) !== null && _b !== void 0 ? _b : '').replace('.html', '');
+        // let id = ($(item).attr('href')?.split('/').pop() ?? '').replace('.html', '')
         let label = $(item).text();
-        genres.tags.push(createTag({ id: id, label: label }));
+        genres.tags.push(createTag({ id: label, label: label }));
     }
     return [genres];
 };
