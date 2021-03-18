@@ -300,7 +300,7 @@ export const parseViewMore = ($: CheerioStatic): MangaTile[] => {
 
 export const isLastPage = ($: CheerioStatic): boolean => {
     const pagenav = $('.pagination')
-    let disabled = $(pagenav).find('.disabled').length > 0
+    let disabled = $('.disabled', pagenav).length > 0
 
     return disabled
 }

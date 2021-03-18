@@ -139,12 +139,12 @@ import {
         })
 
         const request2 = createRequestObject({
-            url: `${BM_DOMAIN}/page/hot.html`,
+            url: `${BM_DOMAIN}/page/hot/1.html`,
             method,
         })
 
         const request3 = createRequestObject({
-            url: `${BM_DOMAIN}/page/new.html`,
+            url: `${BM_DOMAIN}/page/new/1.html`,
             method,
         })
 
@@ -217,6 +217,7 @@ import {
         const response = await this.requestManager.schedule(request, 1)
         const $ = this.cheerio.load(response.data)
         const manga = parseViewMore($)
+        console.log('isLastPage($)' + isLastPage($))
         metadata = !isLastPage($) ? { page: page + 1 } : undefined
 
         return createPagedResults({
