@@ -358,7 +358,7 @@ exports.BainianMangaInfo = {
             type: paperback_extensions_common_1.TagType.RED
         },
         {
-            text: "Chinese",
+            text: "中文",
             type: paperback_extensions_common_1.TagType.GREY
         }
     ]
