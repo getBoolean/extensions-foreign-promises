@@ -1,5 +1,6 @@
 import { Chapter, ChapterDetails, HomeSection, LanguageCode, Manga, MangaStatus, MangaTile, MangaUpdates, PagedResults, SearchRequest, TagSection } from "paperback-extensions-common";
 
+const BM_IMAGE_DOMAIN = 'https://img.lxhy88.com'
 
 export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
     const json = $('[type=application\\/ld\\+json]').html()?.replace(/\t*\n*/g, '') ?? ''
@@ -19,12 +20,12 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
     let hentai = false
 
     const tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] })]
-
+    
     const elems = $('.yac', infoElement).find('a').toArray()
     for (const elem of elems) {
         const text = $(elem).text()
-        const id = $(elem).attr('href')?.split('/').pop()?.split('-').pop() ?? ''
-        if (text.toLowerCase().includes('biantai.html')) { // No hentai on BainianManga
+        const id = (($(elem).attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
+        if (text.toLowerCase().includes('biantai')) { // No hentai on BainianManga
             hentai = true
         }
         tagSections[0].tags.push(createTag({ id: id, label: text }))
@@ -87,10 +88,26 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
 }
 
 
-export const parseChapterPageDetails = ($: CheerioStatic): string => {
-    const image = $('img').attr('src') ?? ''
+export const parseChapterDetails = ($: CheerioStatic, mangaId: string, chapterId: string, { data }: any): ChapterDetails => {
+    let pages = []
+    const re = RegExp("var z_img='(.*?)';")
     
-    return image
+    const images = (data?.match(re) ?? ['',''] )[1]
+
+    if (images != '') {
+        const imagesArr = images.replace(/"/g, '').replace(/\\/g, '').split(',')
+        console.log(imagesArr)
+
+        pages = imagesArr.map((imageCode: string) => `${BM_IMAGE_DOMAIN}/${imageCode}`)
+        console.log(pages)
+    }
+
+    return createChapterDetails({
+        id: chapterId,
+        mangaId: mangaId,
+        pages,
+        longStrip: false
+    })
 }
 
 

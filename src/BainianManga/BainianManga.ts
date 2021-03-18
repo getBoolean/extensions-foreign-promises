@@ -12,16 +12,16 @@ import {
     RequestHeaders,
     TagType
   } from "paperback-extensions-common"
-  import { generateSearch, isLastPage, parseChapterPageDetails, parseChapters, parseHomeSections, parseHotManga, parseNewManga, parseMangaDetails, parseSearch, parseTags, parseUpdatedManga, parseViewMore, UpdatedManga } from "./BainianMangaParser"
+  import { generateSearch, isLastPage, parseChapterDetails, parseChapters, parseHomeSections, parseHotManga, parseNewManga, parseMangaDetails, parseSearch, parseTags, parseUpdatedManga, parseViewMore, UpdatedManga } from "./BainianMangaParser"
   
   const BM_DOMAIN = 'https://m.bnmanhua.com';
   const method = 'GET';
   const headers = {
-    // "content-type": "application/x-www-form-urlencoded"
+      referer: BM_DOMAIN
   };
   
   export const BainianMangaInfo: SourceInfo = {
-    version: '0.0.5',
+    version: '0.0.14',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -78,37 +78,11 @@ import {
             param: `${mangaId}/${chapterId}.html`
         })
 
-        // Get max number of pages
         const response = await this.requestManager.schedule(request, 1)
         const $ = this.cheerio.load(response.data)
-
-        const numPages = Number($('span[id=k_total]', '.bo_tit').text())
-        let page = 0
-
-        // Create request objects for every page and get the image
-        let pages = []
-        for (let i = 1; i <= numPages; i++){
-            let pageRequest = createRequestObject({
-                url: `${BM_DOMAIN}/comic/`,
-                method,
-                headers,
-                param: `${mangaId}/${chapterId}.html?p=${page}`
-            })
-
-            let pageResponse = await this.requestManager.schedule(pageRequest, 1)
-
-            let page$ = this.cheerio.load(pageResponse.data)
-
-            pages.push(parseChapterPageDetails(page$))
-        }
         
 
-        return createChapterDetails({
-            id: chapterId,
-            mangaId: mangaId,
-            pages,
-            longStrip: false
-        })
+        return parseChapterDetails($, mangaId, chapterId, response.data)
     }
   
 
