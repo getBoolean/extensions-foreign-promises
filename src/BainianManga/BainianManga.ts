@@ -35,7 +35,7 @@ import {
             type: TagType.RED
         },
         {
-            text: "Chinese",
+            text: "中文",
             type: TagType.GREY
         }
     ]
