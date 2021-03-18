@@ -22,7 +22,7 @@ import {
   };
   
   export const BainianMangaInfo: SourceInfo = {
-    version: '0.0.20',
+    version: '1.0.0',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -31,10 +31,6 @@ import {
     hentaiSource: false,
     websiteBaseURL: `${BM_DOMAIN}/comic.html`,
     sourceTags: [
-        {
-            text: "WIP",
-            type: TagType.RED
-        },
         {
             text: "中文",
             type: TagType.GREY
