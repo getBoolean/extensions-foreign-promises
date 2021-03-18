@@ -344,7 +344,7 @@ const headers = {
     referer: BM_DOMAIN
 };
 exports.BainianMangaInfo = {
-    version: '0.0.14',
+    version: '0.0.15',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -399,6 +399,8 @@ class BainianManga extends paperback_extensions_common_1.Source {
             });
             const response = yield this.requestManager.schedule(request, 1);
             const $ = this.cheerio.load(response.data);
+            console.log(`${BM_DOMAIN}/comic/${mangaId}/${chapterId}.html`);
+            console.log(response.data);
             return BainianMangaParser_1.parseChapterDetails($, mangaId, chapterId, response.data);
         });
     }
@@ -605,16 +607,15 @@ exports.parseChapters = ($, mangaId) => {
     return chapters;
 };
 exports.parseChapterDetails = ($, mangaId, chapterId, { data }) => {
-    var _a;
+    var _a, _b;
+    const baseImageURL = (_a = data === null || data === void 0 ? void 0 : data.match(/var z_img='(.*?)';/)) === null || _a === void 0 ? void 0 : _a.pop();
+    const imageCode = (_b = data === null || data === void 0 ? void 0 : data.match(/var z_img='(.*?)';/)) === null || _b === void 0 ? void 0 : _b.pop();
     let pages = [];
-    const re = RegExp("var z_img='(.*?)';");
-    const images = ((_a = data === null || data === void 0 ? void 0 : data.match(re)) !== null && _a !== void 0 ? _a : ['', ''])[1];
-    if (images != '') {
-        const imagesArr = images.replace(/"/g, '').replace(/\\/g, '').split(',');
-        console.log(imagesArr);
-        pages = imagesArr.map((imageCode) => `${BM_IMAGE_DOMAIN}/${imageCode}`);
-        console.log(pages);
+    if (imageCode) {
+        const imagePaths = JSON.parse(imageCode);
+        pages = imagePaths.map(imagePath => `${BM_IMAGE_DOMAIN}${imagePath}`);
     }
+    console.log(pages);
     return createChapterDetails({
         id: chapterId,
         mangaId: mangaId,
