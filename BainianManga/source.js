@@ -339,12 +339,13 @@ exports.BainianManga = exports.BainianMangaInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const BainianMangaParser_1 = require("./BainianMangaParser");
 const BM_DOMAIN = 'https://m.bnmanhua.com';
+const BM_IMAGE_DOMAIN = 'https://img.lxhy88.com';
 const method = 'GET';
 const headers = {
     referer: BM_DOMAIN
 };
 exports.BainianMangaInfo = {
-    version: '0.0.15',
+    version: '0.0.16',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -364,9 +365,14 @@ exports.BainianMangaInfo = {
     ]
 };
 class BainianManga extends paperback_extensions_common_1.Source {
+    constructor() {
+        super(...arguments);
+        this.imageDomain = BM_IMAGE_DOMAIN;
+    }
     getMangaShareUrl(mangaId) { return `${BM_DOMAIN}/comic/${mangaId}`; }
     getMangaDetails(mangaId) {
         return __awaiter(this, void 0, void 0, function* () {
+            this.imageDomain = BM_IMAGE_DOMAIN; // Reset image domain back to this
             const request = createRequestObject({
                 url: `${BM_DOMAIN}/comic/`,
                 method,
@@ -374,7 +380,13 @@ class BainianManga extends paperback_extensions_common_1.Source {
             });
             const response = yield this.requestManager.schedule(request, 1);
             const $ = this.cheerio.load(response.data);
-            return BainianMangaParser_1.parseMangaDetails($, mangaId);
+            let result = BainianMangaParser_1.parseMangaDetails($, mangaId);
+            // Get image domain from (ex:) https://img.lxhy88.com/zhang/26110/1602252/d41ae644ddcd2e1edb8141f0b5abf8c1.jpg
+            const image = result[1].replace('https://', '').replace('http://', '');
+            const tempImageDomain = image.substring(0, image.indexOf('/')); // Set imageDomain if it is different
+            this.imageDomain = `https://${tempImageDomain}`;
+            console.log(this.imageDomain);
+            return result[0];
         });
     }
     getChapters(mangaId) {
@@ -399,9 +411,7 @@ class BainianManga extends paperback_extensions_common_1.Source {
             });
             const response = yield this.requestManager.schedule(request, 1);
             const $ = this.cheerio.load(response.data);
-            // console.log(`${BM_DOMAIN}/comic/${mangaId}/${chapterId}.html`)
-            // console.log(response.data)
-            return BainianMangaParser_1.parseChapterDetails($, mangaId, chapterId, response.data);
+            return BainianMangaParser_1.parseChapterDetails(this.imageDomain, mangaId, chapterId, response.data);
         });
     }
     filterUpdatedManga(mangaUpdatesFoundCallback, time, ids) {
@@ -531,7 +541,6 @@ exports.BainianManga = BainianManga;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isLastPage = exports.parseViewMore = exports.parseTags = exports.parseSearch = exports.generateSearch = exports.parseNewManga = exports.parseHotManga = exports.parseHomeSections = exports.parseUpdatedManga = exports.parseChapterDetails = exports.parseChapters = exports.parseMangaDetails = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
-const BM_IMAGE_DOMAIN = 'https://img.lxhy88.com';
 exports.parseMangaDetails = ($, mangaId) => {
     var _a, _b, _c, _d;
     const json = (_b = (_a = $('[type=application\\/ld\\+json]').html()) === null || _a === void 0 ? void 0 : _a.replace(/\t*\n*/g, '')) !== null && _b !== void 0 ? _b : '';
@@ -561,21 +570,25 @@ exports.parseMangaDetails = ($, mangaId) => {
     const time = new Date(parsedJson.upDate);
     lastUpdate = time.toDateString();
     const summary = parsedJson.description;
-    return createManga({
-        id: mangaId,
-        titles,
-        image,
-        rating: Number(rating),
-        status,
-        artist,
-        author,
-        tags: tagSections,
-        views,
-        follows,
-        lastUpdate,
-        desc: summary,
-        hentai
-    });
+    console.log('image: ' + image);
+    // let tempImage = image.replace('https://', '').replace('http://', '')
+    // let tempImageDomain = tempImage.substring(0, tempImage.indexOf('/')) // Set imageDomain if it is different
+    // this.imageDomain = `https://${tempImageDomain}`
+    return [createManga({
+            id: mangaId,
+            titles,
+            image,
+            rating: Number(rating),
+            status,
+            artist,
+            author,
+            tags: tagSections,
+            views,
+            follows,
+            lastUpdate,
+            desc: summary,
+            hentai
+        }), image];
 };
 exports.parseChapters = ($, mangaId) => {
     var _a, _b, _c, _d, _e, _f, _g;
@@ -606,16 +619,16 @@ exports.parseChapters = ($, mangaId) => {
     }
     return chapters;
 };
-exports.parseChapterDetails = ($, mangaId, chapterId, data) => {
-    var _a, _b;
-    const baseImageURL = (_a = data === null || data === void 0 ? void 0 : data.match(/var z_img='(.*?)';/)) === null || _a === void 0 ? void 0 : _a.pop();
-    const imageCode = (_b = data === null || data === void 0 ? void 0 : data.match(/var z_img='(.*?)';/)) === null || _b === void 0 ? void 0 : _b.pop();
+exports.parseChapterDetails = (imageDomain, mangaId, chapterId, data) => {
+    var _a;
+    const baseImageURL = imageDomain;
+    const imageCode = (_a = data === null || data === void 0 ? void 0 : data.match(/var z_img='(.*?)';/)) === null || _a === void 0 ? void 0 : _a.pop();
     console.log("data?.match(/var z_img='(.*?)';/): " + (data === null || data === void 0 ? void 0 : data.match(/var z_img='(.*?)';/)));
     console.log('imageCode: ' + imageCode);
     let pages = [];
     if (imageCode) {
         const imagePaths = JSON.parse(imageCode);
-        pages = imagePaths.map(imagePath => `${BM_IMAGE_DOMAIN}/${imagePath}`);
+        pages = imagePaths.map(imagePath => `${baseImageURL}/${imagePath}`);
     }
     console.log(pages);
     return createChapterDetails({
