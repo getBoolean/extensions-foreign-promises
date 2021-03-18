@@ -21,7 +21,7 @@ import {
   };
   
   export const BainianMangaInfo: SourceInfo = {
-    version: '0.0.14',
+    version: '0.0.15',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -80,7 +80,8 @@ import {
 
         const response = await this.requestManager.schedule(request, 1)
         const $ = this.cheerio.load(response.data)
-        
+        console.log(`${BM_DOMAIN}/comic/${mangaId}/${chapterId}.html`)
+        console.log(response.data)
 
         return parseChapterDetails($, mangaId, chapterId, response.data)
     }

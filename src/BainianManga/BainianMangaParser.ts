@@ -89,18 +89,15 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
 
 
 export const parseChapterDetails = ($: CheerioStatic, mangaId: string, chapterId: string, { data }: any): ChapterDetails => {
-    let pages = []
-    const re = RegExp("var z_img='(.*?)';")
-    
-    const images = (data?.match(re) ?? ['',''] )[1]
+    const baseImageURL = data?.match(/var z_img='(.*?)';/)?.pop()
+    const imageCode = data?.match(/var z_img='(.*?)';/)?.pop()
 
-    if (images != '') {
-        const imagesArr = images.replace(/"/g, '').replace(/\\/g, '').split(',')
-        console.log(imagesArr)
-
-        pages = imagesArr.map((imageCode: string) => `${BM_IMAGE_DOMAIN}/${imageCode}`)
-        console.log(pages)
+    let pages : string[] = []
+    if (imageCode) {
+        const imagePaths = JSON.parse(imageCode) as string[]
+        pages = imagePaths.map(imagePath => `${BM_IMAGE_DOMAIN}${imagePath}`)
     }
+    console.log(pages)
 
     return createChapterDetails({
         id: chapterId,
