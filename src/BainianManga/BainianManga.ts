@@ -80,8 +80,8 @@ import {
 
         const response = await this.requestManager.schedule(request, 1)
         const $ = this.cheerio.load(response.data)
-        console.log(`${BM_DOMAIN}/comic/${mangaId}/${chapterId}.html`)
-        console.log(response.data)
+        // console.log(`${BM_DOMAIN}/comic/${mangaId}/${chapterId}.html`)
+        // console.log(response.data)
 
         return parseChapterDetails($, mangaId, chapterId, response.data)
     }
