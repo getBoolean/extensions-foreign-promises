@@ -88,14 +88,16 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
 }
 
 
-export const parseChapterDetails = ($: CheerioStatic, mangaId: string, chapterId: string, { data }: any): ChapterDetails => {
+export const parseChapterDetails = ($: CheerioStatic, mangaId: string, chapterId: string, data: any): ChapterDetails => {
     const baseImageURL = data?.match(/var z_img='(.*?)';/)?.pop()
     const imageCode = data?.match(/var z_img='(.*?)';/)?.pop()
+    console.log("data?.match(/var z_img='(.*?)';/): " + data?.match(/var z_img='(.*?)';/))
+    console.log('imageCode: ' + imageCode)
 
     let pages : string[] = []
     if (imageCode) {
         const imagePaths = JSON.parse(imageCode) as string[]
-        pages = imagePaths.map(imagePath => `${BM_IMAGE_DOMAIN}${imagePath}`)
+        pages = imagePaths.map(imagePath => `${BM_IMAGE_DOMAIN}/${imagePath}`)
     }
     console.log(pages)
 
