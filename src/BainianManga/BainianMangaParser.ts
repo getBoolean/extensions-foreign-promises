@@ -60,7 +60,7 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
     for (let chapter of allChapters) {
         const id: string = ( $('a', chapter).attr('href')?.split('/').pop() ?? '' ).replace('.html', '')
         const name: string = $('a', chapter).text() ?? ''
-        let tempChapNum: number = Number((name.match(/^第(\d+)/) ?? [0,0] )[1])
+        let tempChapNum: number = Number(name.match(/\d+/) ?? 0 )
 
         if (tempChapNum == 0)
         {
