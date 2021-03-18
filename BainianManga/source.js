@@ -344,7 +344,7 @@ const headers = {
 // "content-type": "application/x-www-form-urlencoded"
 };
 exports.BainianMangaInfo = {
-    version: '0.0.4',
+    version: '0.0.5',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -603,7 +603,7 @@ exports.parseChapters = ($, mangaId) => {
     for (let chapter of allChapters) {
         const id = ((_b = (_a = $('a', chapter).attr('href')) === null || _a === void 0 ? void 0 : _a.split('/').pop()) !== null && _b !== void 0 ? _b : '').replace('.html', '');
         const name = (_c = $('a', chapter).text()) !== null && _c !== void 0 ? _c : '';
-        let tempChapNum = Number(((_d = name.match(/^第(\d+)/)) !== null && _d !== void 0 ? _d : [0, 0])[1]);
+        let tempChapNum = Number((_d = name.match(/\d+/)) !== null && _d !== void 0 ? _d : 0);
         if (tempChapNum == 0) {
             index = allChapters.indexOf(chapter);
             if (index < allChapters.length - 1) {
