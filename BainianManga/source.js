@@ -344,7 +344,7 @@ const headers = {
 // "content-type": "application/x-www-form-urlencoded"
 };
 exports.BainianMangaInfo = {
-    version: '0.0.1',
+    version: '0.0.2',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
