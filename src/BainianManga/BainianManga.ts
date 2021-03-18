@@ -22,7 +22,7 @@ import {
   };
   
   export const BainianMangaInfo: SourceInfo = {
-    version: '0.0.16',
+    version: '0.0.17',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -56,10 +56,12 @@ import {
 
         const response = await this.requestManager.schedule(request, 1)
         const $ = this.cheerio.load(response.data)
+
         let result : [Manga, string] = parseMangaDetails($, mangaId)
+
         // Get image domain from (ex:) https://img.lxhy88.com/zhang/26110/1602252/d41ae644ddcd2e1edb8141f0b5abf8c1.jpg
         const image = result[1].replace('https://', '').replace('http://', '')
-        const tempImageDomain = image.substring(0, image.indexOf('/')) // Set imageDomain if it is different
+        const tempImageDomain = image.substring(0, image.indexOf('/')) // Set new image domain
         this.imageDomain = `https://${tempImageDomain}`
         console.log(this.imageDomain)
 
