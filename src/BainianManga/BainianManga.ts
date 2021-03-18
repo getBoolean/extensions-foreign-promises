@@ -127,7 +127,7 @@ import {
   
       while (updatedManga.loadMore) {
         const request = createRequestObject({
-          url: `${BM_DOMAIN}/page/all/`,
+          url: `${BM_DOMAIN}/page/new/`,
           method,
           headers,
           param: `${String(page++)}.html`

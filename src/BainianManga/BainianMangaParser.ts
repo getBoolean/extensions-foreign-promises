@@ -1,5 +1,6 @@
 import { Chapter, ChapterDetails, HomeSection, LanguageCode, Manga, MangaStatus, MangaTile, MangaUpdates, PagedResults, SearchRequest, TagSection } from "paperback-extensions-common";
 
+
 export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
     const imageElement = $('div.img')
     const infoElement = $('div.data')
@@ -49,6 +50,7 @@ export const parseMangaDetails = ($: CheerioStatic, mangaId: string): Manga => {
     })
 }
 
+
 export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
     const allChapters = $('li', '.list_block ').toArray()
     const chapters: Chapter[] = []
@@ -82,32 +84,31 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
     return chapters
 }
 
+
 export const parseChapterPageDetails = ($: CheerioStatic): string => {
     const image = $('img').attr('src') ?? ''
     
     return image
 }
 
+
 export interface UpdatedManga {
     ids: string[];
     loadMore: boolean;
 }
 
+
 export const parseUpdatedManga = ($: CheerioStatic, time: Date, ids: string[]): UpdatedManga => {
     const foundIds: string[] = []
     let passedReferenceTime = false
-    const panel = $('.panel-content-genres')
-    for (const item of $('.content-genres-item', panel).toArray()) {
-        const id = ($('a', item).first().attr('href') ?? '').split('/').pop() ?? ''
-        let mangaTime = new Date($('.genres-item-time').first().text())
-        // site has a quirk where if the manga what updated in the last hour
-        // it will put the update time as tomorrow
-        if (mangaTime > new Date(Date.now())) {
-            mangaTime = new Date(Date.now() - 60000)
-        }
+    const panel = $('.tbox_m')
+    const allItems = $('.vbox', panel).toArray()
+    for (const item of allItems) {
+        const id = (($('a', item).first().attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
+        let mangaTime = new Date($($(item).find('h4')[1]).text())
 
-        passedReferenceTime = mangaTime <= time
-        if (!passedReferenceTime) {
+        passedReferenceTime = mangaTime > time
+        if (passedReferenceTime) {
             if (ids.includes(id)) {
                 foundIds.push(id)
             }
@@ -117,10 +118,11 @@ export const parseUpdatedManga = ($: CheerioStatic, time: Date, ids: string[]): 
 
     return {
         ids: foundIds,
-        loadMore: !passedReferenceTime
+        loadMore: passedReferenceTime
     }
 }
 
+// TODO
 export const parseHomeSections = ($: CheerioStatic, sections: HomeSection[], sectionCallback: (section: HomeSection) => void): void => {
     for (const section of sections) sectionCallback(section)
     const topManga: MangaTile[] = []
@@ -172,37 +174,26 @@ export const parseHomeSections = ($: CheerioStatic, sections: HomeSection[], sec
     for (const section of sections) sectionCallback(section)
 }
 
-export const generateSearch = (query: SearchRequest): string => {
-    // Format the search query into a proper request
-    const genres = (query.includeGenre ?? []).concat(query.includeDemographic ?? []).join('_')
-    const excluded = (query.excludeGenre ?? []).concat(query.excludeDemographic ?? []).join('_')
-    let status = ""
-    switch (query.status) {
-      case 0: status = 'completed'; break
-      case 1: status = 'ongoing'; break
-      default: status = ''
-    }
 
-    let keyword = (query.title ?? '').replace(/ /g, '_')
+export const generateSearch = (query: SearchRequest): string => {
+
+    let keyword = (query.title ?? '').replace(/ /g, '+')
     if (query.author)
-      keyword += (query.author ?? '').replace(/ /g, '_')
-    let search: string = `s=all&keyw=${keyword}`
-    search += `&g_i=${genres}&g_e=${excluded}`
-    if (status) {
-      search += `&sts=${status}`
-    }
+      keyword += (query.author ?? '').replace(/ /g, '+')
+    let search: string = `${keyword}`
 
     return search
 }
 
+// TODO
 export const parseSearch = ($: CheerioStatic): MangaTile[] => {
-    const panel = $('.panel-content-genres')
-    const items = $('.content-genres-item', panel).toArray();
+    const panel = $('.tbox_m')
+    const allItems = $('.vbox', panel).toArray()
     const manga: MangaTile[] = []
-    for (const item of items) {
-      const id = $('.genres-item-name', item).attr('href')?.split('/').pop() ?? ''
-      const title = $('.genres-item-name', item).text()
-      const subTitle = $('.genres-item-chap', item).text()
+    for (const item of allItems) {
+      const id = (($('a', item).first().attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
+      const title = $('.vbox_t', item).attr('title')
+      const subTitle = ''
       const image = $('.img-loading', item).attr('src') ?? ''
       const rating = $('.genres-item-rate', item).text()
       const updated = $('.genres-item-time', item).text()
@@ -219,6 +210,7 @@ export const parseSearch = ($: CheerioStatic): MangaTile[] => {
     return manga
 }
 
+// TODO
 export const parseTags = ($: CheerioStatic): TagSection[] | null => {
     const panel = $('.advanced-search-tool-genres-list')
     const genres = createTagSection({
@@ -234,6 +226,7 @@ export const parseTags = ($: CheerioStatic): TagSection[] | null => {
     return [genres]
 }
 
+// TODO
 export const parseViewMore = ($: CheerioStatic): MangaTile[] => {
     const manga: MangaTile[] = []
     const panel = $('.panel-content-genres')
@@ -258,6 +251,7 @@ export const parseViewMore = ($: CheerioStatic): MangaTile[] => {
     }
     return manga
 }
+
 
 export const isLastPage = ($: CheerioStatic): boolean => {
     const pagenav = $('.pagination')
