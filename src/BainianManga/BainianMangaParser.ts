@@ -185,26 +185,22 @@ export const generateSearch = (query: SearchRequest): string => {
     return search
 }
 
-// TODO
+
 export const parseSearch = ($: CheerioStatic): MangaTile[] => {
     const panel = $('.tbox_m')
     const allItems = $('.vbox', panel).toArray()
     const manga: MangaTile[] = []
     for (const item of allItems) {
       const id = (($('a', item).first().attr('href') ?? '').split('/').pop() ?? '' ).replace('.html', '')
-      const title = $('.vbox_t', item).attr('title')
-      const subTitle = ''
-      const image = $('.img-loading', item).attr('src') ?? ''
-      const rating = $('.genres-item-rate', item).text()
-      const updated = $('.genres-item-time', item).text()
+      const title = $('.vbox_t', item).attr('title') ?? 'No title'
+      const subTitle = $('.vbox_t span', item).attr('src') ?? ''
+      const image = $('.vbox_t mip-img', item).attr('src') ?? ''
 
       manga.push(createMangaTile({
         id,
         image,
         title: createIconText({ text: title }),
         subtitleText: createIconText({ text: subTitle }),
-        primaryText: createIconText({ text: rating, icon: 'star.fill' }),
-        secondaryText: createIconText({ text: updated, icon: 'clock.fill' })
       }))
     }
     return manga
