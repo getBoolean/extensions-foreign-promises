@@ -345,7 +345,7 @@ const headers = {
     referer: BM_DOMAIN
 };
 exports.BainianMangaInfo = {
-    version: '0.0.19',
+    version: '0.0.20',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -506,7 +506,7 @@ class BainianManga extends paperback_extensions_common_1.Source {
     getViewMoreItems(homepageSectionId, metadata) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('getViewMoreItems($)');
+            // console.log('getViewMoreItems($)')
             let page = (_a = metadata === null || metadata === void 0 ? void 0 : metadata.page) !== null && _a !== void 0 ? _a : 1;
             let param = '';
             if (homepageSectionId === 'hot_comics')
@@ -523,7 +523,7 @@ class BainianManga extends paperback_extensions_common_1.Source {
             const response = yield this.requestManager.schedule(request, 1);
             const $ = this.cheerio.load(response.data);
             const manga = BainianMangaParser_1.parseViewMore($);
-            console.log('isLastPage($)' + BainianMangaParser_1.isLastPage($));
+            // console.log('isLastPage($) ' + isLastPage($))
             metadata = !BainianMangaParser_1.isLastPage($) ? { page: page + 1 } : undefined;
             return createPagedResults({
                 results: manga,
@@ -767,7 +767,7 @@ exports.parseTags = ($) => {
 };
 exports.parseViewMore = ($) => {
     var _a, _b, _c, _d;
-    console.log('parseViewMore($)');
+    // console.log('parseViewMore($)')
     const panel = $('.tbox_m');
     const allItems = $('.vbox', panel).toArray();
     const manga = [];
@@ -786,8 +786,8 @@ exports.parseViewMore = ($) => {
     return manga;
 };
 exports.isLastPage = ($) => {
-    const pagenav = $('.pagination');
-    let disabled = $('.disabled', pagenav).length > 0;
+    // const pagenav = $('.pagination')
+    let disabled = $('li', $('.pagination')).last().hasClass('disabled');
     return disabled;
 };
 
