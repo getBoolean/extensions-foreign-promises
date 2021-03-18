@@ -344,7 +344,7 @@ const headers = {
 // "content-type": "application/x-www-form-urlencoded"
 };
 exports.BainianMangaInfo = {
-    version: '0.0.3',
+    version: '0.0.4',
     name: 'BainianManga (百年漫画)',
     icon: 'favicon.ico',
     author: 'getBoolean',
@@ -617,7 +617,7 @@ exports.parseChapters = ($, mangaId) => {
             id,
             mangaId,
             name,
-            langCode: paperback_extensions_common_1.LanguageCode.ENGLISH,
+            langCode: paperback_extensions_common_1.LanguageCode.CHINEESE,
             chapNum,
             time
         }));
