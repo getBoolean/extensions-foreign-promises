@@ -399,8 +399,8 @@ class BainianManga extends paperback_extensions_common_1.Source {
             });
             const response = yield this.requestManager.schedule(request, 1);
             const $ = this.cheerio.load(response.data);
-            console.log(`${BM_DOMAIN}/comic/${mangaId}/${chapterId}.html`);
-            console.log(response.data);
+            // console.log(`${BM_DOMAIN}/comic/${mangaId}/${chapterId}.html`)
+            // console.log(response.data)
             return BainianMangaParser_1.parseChapterDetails($, mangaId, chapterId, response.data);
         });
     }
