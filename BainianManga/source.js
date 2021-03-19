@@ -347,7 +347,7 @@ const headers = {
 exports.BainianMangaInfo = {
     version: '1.0.0',
     name: 'BainianManga (百年漫画)',
-    icon: 'favicon.ico',
+    icon: 'favicon.png',
     author: 'getBoolean',
     authorWebsite: 'https://github.com/getBoolean',
     description: 'Extension that pulls manga from BainianManga',
