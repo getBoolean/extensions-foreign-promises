@@ -585,7 +585,6 @@ exports.parseChapters = ($, mangaId) => {
     const time = new Date(parsedJson.upDate); // Set time for all chapters to be the last updated time
     const allChapters = $('li', '.list_block ').toArray();
     const chapters = [];
-    let index;
     for (let chapter of allChapters) {
         const id = ((_d = (_c = $('a', chapter).attr('href')) === null || _c === void 0 ? void 0 : _c.split('/').pop()) !== null && _d !== void 0 ? _d : '').replace('.html', '');
         const name = (_e = $('a', chapter).text()) !== null && _e !== void 0 ? _e : '';
