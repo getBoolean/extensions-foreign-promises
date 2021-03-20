@@ -52,7 +52,7 @@ export const parseChapters = ($: CheerioStatic, mangaId: string): Chapter[] => {
 
     const allChapters = $('li', '.list_block ').toArray()
     const chapters: Chapter[] = []
-    let index
+
     for (let chapter of allChapters) {
         const id: string = ( $('a', chapter).attr('href')?.split('/').pop() ?? '' ).replace('.html', '')
         const name: string = $('a', chapter).text() ?? ''
