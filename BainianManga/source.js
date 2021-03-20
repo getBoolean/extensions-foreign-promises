@@ -407,7 +407,7 @@ class BainianManga extends paperback_extensions_common_1.Source {
                 param: `${mangaId}/${chapterId}.html`
             });
             const response = yield this.requestManager.schedule(request, 1);
-            const $ = this.cheerio.load(response.data);
+            // const $ = this.cheerio.load(response.data)
             return BainianMangaParser_1.parseChapterDetails(this.imageDomain, mangaId, chapterId, response.data);
         });
     }
@@ -579,7 +579,7 @@ exports.parseMangaDetails = ($, mangaId) => {
         }), image];
 };
 exports.parseChapters = ($, mangaId) => {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _a, _b, _c, _d, _e, _f;
     const json = (_b = (_a = $('[type=application\\/ld\\+json]').html()) === null || _a === void 0 ? void 0 : _a.replace(/\t*\n*/g, '')) !== null && _b !== void 0 ? _b : '';
     const parsedJson = JSON.parse(json);
     const time = new Date(parsedJson.upDate); // Set time for all chapters to be the last updated time
@@ -589,15 +589,7 @@ exports.parseChapters = ($, mangaId) => {
     for (let chapter of allChapters) {
         const id = ((_d = (_c = $('a', chapter).attr('href')) === null || _c === void 0 ? void 0 : _c.split('/').pop()) !== null && _d !== void 0 ? _d : '').replace('.html', '');
         const name = (_e = $('a', chapter).text()) !== null && _e !== void 0 ? _e : '';
-        let tempChapNum = Number((_f = name.match(/\d+/)) !== null && _f !== void 0 ? _f : 0);
-        if (tempChapNum == 0) {
-            index = allChapters.indexOf(chapter);
-            if (index < allChapters.length - 1) {
-                const nextName = (_g = $('a', allChapters[index + 1]).text()) !== null && _g !== void 0 ? _g : '';
-                tempChapNum = Number((_h = nextName.match(/\d+/)) !== null && _h !== void 0 ? _h : 0) + 0.5;
-            }
-        }
-        const chapNum = tempChapNum;
+        const chapNum = Number((_f = name.match(/\d+/)) !== null && _f !== void 0 ? _f : 0);
         chapters.push(createChapter({
             id,
             mangaId,
